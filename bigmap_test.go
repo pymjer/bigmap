@@ -2,9 +2,12 @@ package bigmap
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/dgraph-io/badger"
+	"github.com/dgraph-io/badger/pb"
 )
 
 func TestSet(t *testing.T) {
@@ -63,7 +66,7 @@ func TestSetWithTTL(t *testing.T) {
 	SetWithTTL(key, "aavalue", 3)
 	for i := 0; i < 5; i++ {
 		fmt.Printf("after %v second...\n", i)
-		// time.Sleep(time.Second)
+		time.Sleep(time.Second)
 		err := view(db, []byte(key))
 		if i < 2 && err != nil {
 			t.Fail()
@@ -118,4 +121,37 @@ func TestAllKey(t *testing.T) {
 		fmt.Printf("key: %s \n", k)
 	}
 	defer db.Close()
+}
+
+type collector struct {
+	kv []*pb.KV
+}
+
+func (c *collector) Send(list *pb.KVList) error {
+	c.kv = append(c.kv, list.Kv...)
+	return nil
+}
+
+func TestStream(t *testing.T) {
+	Init("./data")
+	defer db.Close()
+
+	var count int
+	for _, prefix := range []string{"p0", "p1", "p2"} {
+		for i := 1; i <= 100; i++ {
+			Set(prefix+strconv.Itoa(i), strconv.Itoa(i))
+			count++
+		}
+	}
+
+	c := &collector{}
+	send := func(list *pb.KVList) error {
+		return c.Send(list)
+	}
+	Stream("p", send)
+	time.Sleep(time.Second)
+	fmt.Printf("count: %v, get: %v\n", count, len(c.kv))
+	// for _, kv := range c.kv {
+	// 	fmt.Printf("key: %v, value: %v\n", string(kv.Key), string(kv.Value))
+	// }
 }
