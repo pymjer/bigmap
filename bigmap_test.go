@@ -6,8 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgraph-io/badger"
-	"github.com/dgraph-io/badger/pb"
+	"github.com/dgraph-io/badger/v3"
+	"github.com/dgraph-io/badger/v3/pb"
+	"github.com/dgraph-io/ristretto/z"
+	"github.com/gogo/protobuf/proto"
 )
 
 func TestSet(t *testing.T) {
@@ -127,8 +129,18 @@ type collector struct {
 	kv []*pb.KV
 }
 
-func (c *collector) Send(list *pb.KVList) error {
-	c.kv = append(c.kv, list.Kv...)
+func (c *collector) Send(buf *z.Buffer) error {
+	list, err := badger.BufferToKVList(buf)
+	if err != nil {
+		return err
+	}
+	for _, kv := range list.Kv {
+		if kv.StreamDone {
+			return nil
+		}
+		cp := proto.Clone(kv).(*pb.KV)
+		c.kv = append(c.kv, cp)
+	}
 	return nil
 }
 
@@ -145,8 +157,8 @@ func TestStream(t *testing.T) {
 	}
 
 	c := &collector{}
-	send := func(list *pb.KVList) error {
-		return c.Send(list)
+	send := func(buf *z.Buffer) error {
+		return c.Send(buf)
 	}
 	Stream("p", send)
 	time.Sleep(time.Second)

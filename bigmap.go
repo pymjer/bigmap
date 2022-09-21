@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/dgraph-io/badger"
-	"github.com/dgraph-io/badger/pb"
+	"github.com/dgraph-io/badger/v3"
+	"github.com/dgraph-io/ristretto/z"
 )
 
 var db *badger.DB
@@ -148,7 +148,7 @@ func All() []KVPair {
 	return res
 }
 
-func Stream(prefix string, send func(*pb.KVList) error) error {
+func Stream(prefix string, send func(buf *z.Buffer) error) error {
 	stream := db.NewStream()
 
 	// -- Optional setting
