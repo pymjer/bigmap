@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pymjer/bigmap"
+	"github.com/pymjer/bigmap/v2"
 )
 
 type KVP struct {

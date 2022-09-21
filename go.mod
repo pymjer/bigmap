@@ -1,4 +1,4 @@
-module github.com/pymjer/bigmap
+module github.com/pymjer/bigmap/v2
 
 go 1.19
 
