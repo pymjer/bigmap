@@ -23,6 +23,13 @@ func Init(dbPath string) error {
 	return nil
 }
 
+func Close() error {
+	if db != nil {
+		return db.Close()
+	}
+	return nil
+}
+
 // Set用于在db中添加一个键值对，如果添加失败会返回一个错误
 func Set(k string, v string) error {
 	txn := db.NewTransaction(true)
