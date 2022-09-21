@@ -101,12 +101,12 @@ func AllKey() []string {
 }
 
 type KVPair struct {
-	key   string
-	value string
+	Key   string
+	Value string
 }
 
 func (p KVPair) String() string {
-	return fmt.Sprintf("%s:%s", p.key, p.value)
+	return fmt.Sprintf("%s:%s", p.Key, p.Value)
 }
 
 func Seek(prefix string) []KVPair {

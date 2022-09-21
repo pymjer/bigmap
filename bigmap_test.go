@@ -65,8 +65,8 @@ func TestSetWithTTL(t *testing.T) {
 	Init("./data")
 	defer db.Close()
 	key := "aa"
-	SetWithTTL(key, "aavalue", 3)
-	for i := 0; i < 5; i++ {
+	SetWithTTL(key, "aavalue", 2)
+	for i := 0; i < 2; i++ {
 		fmt.Printf("after %v second...\n", i)
 		time.Sleep(time.Second)
 		err := view(db, []byte(key))
